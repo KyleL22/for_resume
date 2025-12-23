@@ -51,11 +51,13 @@
 
 ## 6. Supabase 데이터베이스 접속 정보
 - **Supabase 포털:** https://supabase.com/
-  - **계정:** devops@dwcc.co.kr
-  - **비밀번호:** Dwcc@182900
+  - **계정:** 보안 저장소(예: 1Password) 또는 배포 환경 변수(`SUPABASE_EMAIL`)에서 확인.
+  - **비밀번호:** 보안 저장소 또는 배포 환경 변수(`SUPABASE_PASSWORD`)에서 확인.
 - **DBeaver 연결 설정(PostgreSQL):**
-  - `Host`: aws-1-ap-northeast-2.pooler.supabase.com
-  - `Port`: 6543
-  - `Database`: postgres
-  - `User name`: postgres.igoxheklyfyqrjrvtqxx
-  - `Password`: Dwcc@182900
+  - `Host`: 배포 환경 변수(`SUPABASE_DB_HOST`) 사용.
+  - `Port`: 배포 환경 변수(`SUPABASE_DB_PORT`, 기본 6543) 사용.
+  - `Database`: 배포 환경 변수(`SUPABASE_DB_NAME`) 사용.
+  - `User name`: 배포 환경 변수(`SUPABASE_DB_USER`) 사용.
+  - `Password`: 배포 환경 변수(`SUPABASE_DB_PASSWORD`) 사용.
+
+> **보안 지침:** 실제 계정과 암호는 저장소에 커밋하지 말고, 조직의 비밀 관리 정책에 따라 환경 변수 또는 비밀 금고에서만 관리합니다.
