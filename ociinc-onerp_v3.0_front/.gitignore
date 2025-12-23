@@ -1,0 +1,57 @@
+# .gitignore (onerp_v3.0 Git Repository Root)
+
+# Eclipse/STS and other IDE files
+.idea/
+.settings/
+.project
+.classpath
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Build outputs and generated files for Java projects
+# This covers 'bin' and 'build' folders within any submodule
+# For example, backend-project/auth-service/bin
+**/bin/
+**/build/
+**/target/
+**/out/
+
+# Compiled Java output files
+**/*.class
+
+# Package files (JAR, WAR, EAR)
+**/*.jar
+**/*.war
+**/*.ear
+**/*.zip
+
+# Gradle specific caches and outputs
+.gradle/
+# Force include the Gradle Wrapper JAR and scripts (CRITICAL for builds)
+!**/gradle/wrapper/gradle-wrapper.jar
+!**/gradle/wrapper/gradle-wrapper.properties
+!**/gradlew
+!**/gradlew.bat
+
+# Spring Boot specific local configuration files (optional, depends on tracking intent)
+# application-*.yml
+# *.sample.yml
+# NOTE: If application.yml files are generated into build output (like bin/main/),
+# the above **/bin/ rule will cover them. If they are sensitive and exist directly
+# in the source folder, then explicitly ignore them, e.g., application-local.yml.
+application-local.yml
+
+# Other temporary or sensitive files
+*.bak
+*.temp
+*.tmp
