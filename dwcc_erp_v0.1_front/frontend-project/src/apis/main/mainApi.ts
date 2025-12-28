@@ -72,7 +72,7 @@ export const getMainInitDataApi = async (): Promise<
       pgmName: "인력등록",
       sort: 2,
       useYn: "Y",
-      path: "/pages/admin/people/PersonCreatePage.tsx",
+      path: "/pages/admin/people/new/PersonCreatePage.tsx",
     },
     {
       lvl: 2,

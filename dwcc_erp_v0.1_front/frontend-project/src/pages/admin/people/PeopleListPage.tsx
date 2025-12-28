@@ -18,7 +18,7 @@ import { createGridReadyHandlerRef } from '@utils/agGridUtils';
 import { useUiStore } from '@/store/uiStore';
 import PersonProfilePage from '@/pages/admin/people/PersonProfilePage';
 import PersonUpsertPage from '@/pages/admin/people/PersonUpsertPage';
-import PersonCreatePage from '@/pages/admin/people/PersonCreatePage';
+import PersonCreatePage from '@/pages/admin/people/new/PersonCreatePage';
 
 const PeopleListPage: React.FC = () => {
     // const [_t] = useTranslation(); // Unused
@@ -83,8 +83,8 @@ const PeopleListPage: React.FC = () => {
 
     const handleRegister = () => {
         addTab({
-            // 파일 기반 라우트 패턴과 동일한 경로로 탭을 생성 (사이드바 메뉴와 일치)
-            path: `/app/admin/people/PersonCreatePage`,
+            // 등록 전용 독립 화면: /app/admin/people/new
+            path: `/app/admin/people/new`,
             element: <PersonCreatePage />,
             meta: {
                 title: '인력 등록 (독립 화면)',
@@ -188,6 +188,7 @@ const PeopleListPage: React.FC = () => {
                     <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'flex-end' }}>
                         <ActionButtonGroup
                             hideButtons={["create", "edit", "copy", "delete", "save"]}
+                            showAllCustomButtons
                             customButtons={[
                                 <ActionButton
                                     actionType="copy"
