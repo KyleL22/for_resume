@@ -19,9 +19,11 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   StarOutlined,
+  StarFilled,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { useUiStore } from "@store/uiStore";
+import { useAuthStore } from "@store/authStore";
 import type { MenuProps } from "antd";
 import {
   StyledSidebar,
@@ -31,6 +33,8 @@ import {
   StyledMenu,
   StyledCollapseButton,
   StyledFavoritesCount,
+  StyledSectionHeader,
+  StyledFavoriteToggle,
 } from "./MainSidebar.styles";
 import { getMainInitDataApi } from "@apis/main";
 import type { MenuItem } from "@/types/api.types";
@@ -130,7 +134,9 @@ const buildMenuTree = (menus: MenuItem[]): MenuItem[] => {
  */
 const convertToMenuItems = (
   menus: MenuItem[],
-  t: ReturnType<typeof useTranslation>["t"]
+  t: ReturnType<typeof useTranslation>["t"],
+  favorites: Set<string>,
+  onToggleFavorite: (e: React.MouseEvent, pgmNo: string) => void
 ): MenuItemType[] => {
   if (!menus || menus.length === 0) {
     return [];
@@ -141,15 +147,30 @@ const convertToMenuItems = (
   for (const menu of menus) {
     if (menu.useYn !== "Y" || menu.hidden === "Y") continue;
 
-    const label = menu.lKey
+    const isFavorite = favorites.has(menu.pgmNo);
+    const labelText = menu.lKey
       ? t(menu.lKey, menu.pgmName || menu.lKey)
       : menu.pgmName || "";
+
+    const label = (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+        <span>{labelText}</span>
+        {menu.path && (
+          <StyledFavoriteToggle
+            $isFavorite={isFavorite}
+            onClick={(e) => onToggleFavorite(e, menu.pgmNo)}
+          >
+            {isFavorite ? <StarFilled /> : <StarOutlined />}
+          </StyledFavoriteToggle>
+        )}
+      </div>
+    );
 
     const icon = menu.lvl === 1 ? getMenuIcon(menu, "MainSidebar") : undefined;
 
     // SubMenu 처리
     if (menu.children && menu.children.length > 0) {
-      const children = convertToMenuItems(menu.children, t);
+      const children = convertToMenuItems(menu.children, t, favorites, onToggleFavorite);
       if (children.length > 0) {
         result.push(
           icon
@@ -320,6 +341,12 @@ const MainSidebar: React.FC = () => {
   const [sidebarWidth, setSidebarWidth] = useState(250);
   const [menus, setMenus] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Favorites State
+  const user = useAuthStore((state) => state.user);
+  const empCode = user?.empCode || "guest";
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
   const menuContainerRef = useRef<HTMLDivElement>(null);
   const widthCalculationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -328,6 +355,42 @@ const MainSidebar: React.FC = () => {
   // Zustand 선택적 구독
   const addTab = useUiStore((state) => state.addTab);
   const activeTabKey = useUiStore((state) => state.activeTabKey);
+
+  // Load Favorites from LocalStorage
+  useEffect(() => {
+    if (empCode) {
+      const stored = localStorage.getItem(`favorites_${empCode}`);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            setFavorites(new Set(parsed));
+          }
+        } catch (e) {
+          console.error("Failed to parse favorites", e);
+        }
+      }
+    }
+  }, [empCode]);
+
+  // Save Favorites to LocalStorage
+  const saveFavorites = useCallback((newFavorites: Set<string>) => {
+    localStorage.setItem(`favorites_${empCode}`, JSON.stringify(Array.from(newFavorites)));
+  }, [empCode]);
+
+  const handleToggleFavorite = useCallback((e: React.MouseEvent, pgmNo: string) => {
+    e.stopPropagation(); // Don't trigger menu click
+    setFavorites(prev => {
+      const next = new Set(prev);
+      if (next.has(pgmNo)) {
+        next.delete(pgmNo);
+      } else {
+        next.add(pgmNo);
+      }
+      saveFavorites(next);
+      return next;
+    });
+  }, [saveFavorites]);
 
   // Canvas 초기화
   useEffect(() => {
@@ -343,8 +406,9 @@ const MainSidebar: React.FC = () => {
       try {
         setLoading(true);
 
-        // 캐시에서 먼저 확인
-        const cachedMenus = getMenuCache();
+        // 캐시에서 먼저 확인 (개발 모드에서는 캐시 스킵하여 Mock 데이터 변경사항 즉시 반영)
+        const isDev = import.meta.env.DEV;
+        const cachedMenus = !isDev ? getMenuCache() : null;
         if (cachedMenus && cachedMenus.length > 0) {
           setMenus(cachedMenus);
           setLoading(false);
@@ -391,9 +455,16 @@ const MainSidebar: React.FC = () => {
     return map;
   }, [menuTree]);
 
-  const sidebarMenuItems = useMemo(
-    () => convertToMenuItems(menuTree, t),
-    [menuTree, t]
+  // Favorite Menu Items
+  const favoriteMenuItems = useMemo(() => {
+    const favMenus = menus.filter(m => favorites.has(m.pgmNo) && m.path);
+    return convertToMenuItems(favMenus, t, favorites, handleToggleFavorite);
+  }, [menus, t, favorites, handleToggleFavorite]);
+
+  // All Menu Items
+  const allMenuItems = useMemo(
+    () => convertToMenuItems(menuTree, t, favorites, handleToggleFavorite),
+    [menuTree, t, favorites, handleToggleFavorite]
   );
 
   const selectedKeys = useMemo(
@@ -586,26 +657,42 @@ const MainSidebar: React.FC = () => {
       width={collapsed ? 64 : sidebarWidth}
       collapsedWidth={64}
     >
-      {collapsed ? (
-        <StyledSidebarHeaderCollapsed>
-          <StarOutlined />
-        </StyledSidebarHeaderCollapsed>
-      ) : (
-        <StyledSidebarHeader>
-          <span>{t("favorites", "즐겨찾기")}</span>
-          <StyledFavoritesCount>5</StyledFavoritesCount>
-        </StyledSidebarHeader>
-      )}
+      <StyledSidebarHeader>
+        {!collapsed && <span>OCI-ON ERP</span>}
+        {collapsed ? <StarFilled style={{ color: '#ffc107' }} /> : <StyledFavoritesCount>{favorites.size}</StyledFavoritesCount>}
+      </StyledSidebarHeader>
+
       <StyledMenuContainer ref={menuContainerRef}>
+        {/* Favorites Section */}
+        {favorites.size > 0 && (
+          <>
+            <StyledSectionHeader $isCollapsed={collapsed}>
+              {collapsed ? <StarOutlined /> : t("favorites", "즐겨찾기")}
+            </StyledSectionHeader>
+            <StyledMenu
+              theme="dark"
+              selectedKeys={selectedKeys}
+              mode="inline"
+              items={favoriteMenuItems}
+              onClick={handleMenuClick}
+            />
+          </>
+        )}
+
+        {/* All Menus Section */}
+        <StyledSectionHeader $isCollapsed={collapsed}>
+          {collapsed ? <MenuFoldOutlined /> : t("all_menus", "전체 메뉴")}
+        </StyledSectionHeader>
         <StyledMenu
           theme="dark"
           selectedKeys={selectedKeys}
           mode="inline"
-          items={sidebarMenuItems}
+          items={allMenuItems}
           onClick={handleMenuClick}
           onOpenChange={handleMenuOpenChange}
         />
       </StyledMenuContainer>
+
       <StyledCollapseButton onClick={() => setCollapsed(!collapsed)}>
         {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
       </StyledCollapseButton>

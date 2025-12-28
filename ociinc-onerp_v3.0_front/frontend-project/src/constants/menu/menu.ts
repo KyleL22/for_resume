@@ -23,5 +23,5 @@ export const MENU_CACHE_EXPIRY_KEY = "menu_cache_expiry";
 /**
  * 루트 메뉴의 부모 프로그램 번호
  */
-export const ROOT_PARENT_PGM_NO = "90000";
+export const ROOT_PARENT_PGM_NO = "ROOT";
 

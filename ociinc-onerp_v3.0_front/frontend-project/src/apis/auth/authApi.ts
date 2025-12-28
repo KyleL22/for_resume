@@ -22,6 +22,34 @@ import type {
 export const loginApi = async (
   data: LoginRequest
 ): Promise<ApiResponse<LoginResponse>> => {
+  // MOCK: 테스트 계정 (admin/admin123)
+  if (data.empCode === "admin" && data.password === "admin123") {
+    // 가짜 로그인 응답 생성
+    const mockUser: AuthUser = {
+      officeId: "1000",
+      empCode: "admin",
+      empName: "System Admin",
+      deptCode: "SYS",
+      password: "admin",
+      useYn: "Y",
+      emailId: "admin@oci.com",
+    };
+
+    const mockResponse: ApiResponse<LoginResponse> = {
+      success: true,
+      data: {
+        accessToken: "mock-access-token",
+        ...mockUser,
+        user: mockUser,
+      },
+      status: 200,
+    };
+
+    // 토큰 설정 및 리턴 (기존 성공 로직과 동일 효과)
+    setAccessToken(mockResponse.data!.accessToken);
+    return mockResponse;
+  }
+
   const response = await post<LoginResponse>("/auth/login", data, {
     skipAuth: true,
   });

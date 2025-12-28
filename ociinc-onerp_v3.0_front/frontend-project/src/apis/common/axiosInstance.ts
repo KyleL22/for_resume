@@ -49,6 +49,30 @@ const processQueue = (
 };
 
 // --------------------------------------------------------------------------
+// Mock Adapter
+// --------------------------------------------------------------------------
+const mockAdapter = async (config: InternalAxiosRequestConfig) => {
+  // 네트워크 지연 시뮬레이션 (선택 사항)
+  await new Promise((resolve) => setTimeout(resolve, 500));
+
+  console.log(`[Mock Adapter] Request: ${config.method?.toUpperCase()} ${config.url}`);
+
+  return {
+    data: {
+      success: true,
+      data: {}, // 기본 빈 데이터
+      message: "Backend Bypassed (Mock)",
+      code: "200",
+    },
+    status: 200,
+    statusText: "OK",
+    headers: {},
+    config,
+    request: {},
+  };
+};
+
+// --------------------------------------------------------------------------
 // Axios 인스턴스 생성
 // --------------------------------------------------------------------------
 const axiosInstance: AxiosInstance = axios.create({
@@ -59,6 +83,7 @@ const axiosInstance: AxiosInstance = axios.create({
     "X-User-Locale": i18n.language || "ko",
   },
   withCredentials: true,
+  adapter: mockAdapter, // 모든 요청을 Mock Adapter로 처리
 });
 
 // --------------------------------------------------------------------------

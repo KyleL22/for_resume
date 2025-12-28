@@ -83,6 +83,44 @@ export const StyledFavoritesCount = styled.span`
   line-height: 1.4;
 `;
 
+export const StyledSectionHeader = styled.div<{ $isCollapsed: boolean }>`
+  padding: 12px 20px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  justify-content: ${props => props.$isCollapsed ? 'center' : 'space-between'};
+  transition: all 0.2s;
+  
+  &:not(:first-child) {
+    margin-top: 8px;
+  }
+`;
+
+export const StyledFavoriteToggle = styled.div<{ $isFavorite: boolean }>`
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s;
+  color: ${props => props.$isFavorite ? '#ffc107' : 'rgba(255, 255, 255, 0.25)'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+
+  &:hover {
+    color: #ffc107;
+    transform: translateY(-50%) scale(1.1);
+  }
+`;
+
 export const StyledMenuContainer = styled.div`
   flex: 1;
   overflow-y: auto;
@@ -126,11 +164,18 @@ export const StyledMenu = styled(Menu)`
     border-radius: 6px;
     height: 40px;
     line-height: 40px;
-    padding-right: 20px !important;
+    padding-right: 40px !important;
     color: #ffffff !important;
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: clip !important;
+    position: relative;
+
+    &:hover {
+      ${StyledFavoriteToggle} {
+        opacity: 1;
+      }
+    }
 
     > span {
       color: #ffffff !important;

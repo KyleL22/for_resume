@@ -1,5 +1,10 @@
 {
   "LABEL_AC_00377": "Advenced Payment Name",
+  "인력관리": "People Management",
+  "인력관리목록": "People List",
+  "인력관리등록": "Person Registration",
+  "프로젝트관리": "Project Management",
+  "공통코드관리": "Common Code Management",
   "LABEL_AC_00376": "Employee",
   "LABEL_AC_00379": "Advance payment settlement",
   "LABEL_AC_00378": "Begin DAte",
