@@ -7,9 +7,11 @@ import { useNavigate } from "react-router-dom";
 import type { LoginFormValues } from "@/types/login.types";
 import { loginApi } from "@apis/auth";
 import { useAuthStore } from "@/store/authStore";
+import { setAccessToken } from "@/utils/tokenUtils";
 import { showError, showInfo } from "@/components/ui/feedback/Message/Message";
 import { REMEMBERED_ID_KEY } from "@/constants";
 import { StyledForgotLink, StyledLoginButton } from "./LoginForm.styles";
+import type { AuthUser } from "@/types/auth.types";
 
 const LoginForm: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -102,6 +104,27 @@ const LoginForm: React.FC = () => {
     showInfo(t("resetPassword", "비밀번호 초기화 기능은 준비 중입니다."));
   };
 
+  // 개발 편의용: 첫 로그인 페이지 우회 버튼
+  const handleBypassLogin = () => {
+    const mockUser: AuthUser = {
+      officeId: "LOCAL",
+      empCode: "admin",
+      empName: "System Admin",
+      deptCode: "SYS",
+      useYn: "Y",
+      emailId: "admin@mock.local",
+    };
+    setAccessToken("mock-access-token-bypass");
+    setUser(mockUser);
+    notification.success({
+      title: t("login_success", "로그인 성공!"),
+      description: t("bypass_login", "임시 로그인으로 메인으로 이동합니다."),
+      placement: "topRight",
+      duration: 2,
+    });
+    navigate("/app");
+  };
+
   const handleCapsLockChange = (e: React.KeyboardEvent<HTMLInputElement>) => {
     setShowCaseWarning(e.getModifierState("CapsLock"));
   };
@@ -172,6 +195,11 @@ const LoginForm: React.FC = () => {
       <Form.Item>
         <StyledLoginButton type="primary" htmlType="submit" block>
           {t("login_button", "로그인")}
+        </StyledLoginButton>
+      </Form.Item>
+      <Form.Item>
+        <StyledLoginButton type="default" block onClick={handleBypassLogin}>
+          {t("bypass_login_button", "임시 접속 (우회)")}
         </StyledLoginButton>
       </Form.Item>
     </Form>
