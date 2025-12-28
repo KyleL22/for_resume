@@ -69,10 +69,10 @@ export const getMainInitDataApi = async (): Promise<
       systemId: "SYS",
       pgmNo: "PEOPLE_REG",
       parentPgmNo: "PEOPLE_MNG",
-      pgmName: "인력관리등록",
+      pgmName: "인력등록",
       sort: 2,
       useYn: "Y",
-      path: "/pages/admin/people/PersonUpsertPage.tsx",
+      path: "/pages/admin/people/PersonCreatePage.tsx",
     },
     {
       lvl: 2,
@@ -114,4 +114,3 @@ export const getMainInitDataApi = async (): Promise<
   // 2. 실제 API 호출 (필요 시 주석 해제)
   // return get<MainInitResponse>("/system/main/init");
 };
-

@@ -10,6 +10,7 @@ import type { Person } from '@/types/admin/admin.types';
 import { showSuccess, showError } from '@components/ui/feedback/Message';
 import { useUiStore } from '@/store/uiStore';
 import dayjs from 'dayjs';
+import { useParams } from 'react-router-dom';
 
 const { TextArea } = Input;
 
@@ -23,15 +24,18 @@ const PersonUpsertPage: React.FC<PersonUpsertPageProps> = ({ mode = 'create', pe
     const [loading, setLoading] = useState(false);
     const { fetchCodes, getOptionsByGroupId } = useAdminCodeStore();
     const { removeTab, activeTabKey } = useUiStore();
+    const params = useParams<{ personId: string }>();
+    const resolvedPersonId = personId || params.personId;
 
     useEffect(() => {
         fetchCodes();
         loadData();
-    }, [mode, personId]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mode, resolvedPersonId]);
 
     const loadData = () => {
-        if (mode === 'edit' && personId) {
-            const p = adminMockService.getPeople().find(item => item.personId === personId);
+        if (mode === 'edit' && resolvedPersonId) {
+            const p = adminMockService.getPeople().find(item => item.personId === resolvedPersonId);
             if (p) {
                 // Convert date strings to dayjs if needed for DatePicker
                 const formData = {
@@ -71,7 +75,7 @@ const PersonUpsertPage: React.FC<PersonUpsertPageProps> = ({ mode = 'create', pe
                 processedValues.id = newId; // Ensure AG Grid ID compatibility
             } else {
                 // Determine ID from prop or form
-                processedValues.personId = personId || values.personId;
+                processedValues.personId = resolvedPersonId || values.personId;
                 processedValues.id = processedValues.personId;
             }
 
